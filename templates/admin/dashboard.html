@@ -1,0 +1,142 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Dashboard | {{ site_title }}{% endblock %}
+
+{% block content %}
+<h1>Analytics Dashboard</h1>
+
+<div class="dashboard-stats">
+    <div class="stat">
+        <h2>Total Properties</h2>
+        <p>{{ total_properties }}</p>
+    </div>
+    <div class="stat">
+        <h2>Average Price</h2>
+        <p>${{ avg_price|floatformat:2 }}</p>
+    </div>
+    <div class="stat">
+        <h2>Top Locations</h2>
+        <ul>
+            {% for loc in top_locations %}
+            <li>{{ loc.location }} ({{ loc.count }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Serialize top_locations into a JavaScript variable -->
+<div style="display: none;" id="location-data">{{ top_locations_json|escapejs }}</div>
+
+<div style="margin-top: 2rem;">
+    <canvas id="propertiesChart" width="400" height="200"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Get the location data from the hidden div
+    const locationData = JSON.parse(document.getElementById('location-data').textContent);
+
+    // Map the data to labels and values for the chart
+    const labels = locationData.map(loc => loc.location);
+    const dataValues = locationData.map(loc => loc.count);
+
+    // Get the context for the chart
+    const ctx = document.getElementById('propertiesChart').getContext('2d');
+
+    // Prepare the chart data
+    const data = {
+        labels: labels,
+        datasets: [{
+            label: 'Properties by Location',
+            data: dataValues,
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.5)',
+                'rgba(255, 99, 132, 0.5)',
+                'rgba(255, 206, 86, 0.5)',
+                'rgba(75, 192, 192, 0.5)',
+                'rgba(153, 102, 255, 0.5)'
+            ],
+            borderColor: [
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+
+    // Configure the chart options
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        font: {
+                            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    };
+
+    // Initialize the chart
+    new Chart(ctx, config);
+</script>
+
+<style>
+.dashboard-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.stat {
+    background: var(--body-bg);
+    border: 1px solid var(--border-color);
+    color: var(--body-fg);
+    padding: 1rem 2rem;
+    border-radius: 0.5rem;
+    flex: 1 1 250px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.stat h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--header-link-color);
+}
+
+.stat p, .stat ul {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.stat ul {
+    list-style: none;
+    padding: 0;
+}
+
+/* Responsive for small screens */
+@media (max-width: 600px) {
+    .dashboard-stats {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
