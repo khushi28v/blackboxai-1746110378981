@@ -1,0 +1,38 @@
+{% extends 'listings/base.html' %}
+
+{% block title %}{{ property.title }} - Real Estate{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded shadow p-6 max-w-4xl mx-auto space-y-6">
+    <h1 class="text-4xl font-extrabold text-gray-900">{{ property.title }}</h1>
+    {% if property.image %}
+    <img src="{{ property.image.url }}" alt="{{ property.title }}" class="w-full h-96 object-cover rounded-lg shadow-md" />
+    {% endif %}
+    <p class="text-gray-700 text-lg leading-relaxed">{{ property.description }}</p>
+    <div class="grid grid-cols-2 gap-6 text-gray-800 font-semibold">
+        <div>Location: <span class="text-blue-600">{{ property.location }}</span></div>
+        <div>Price: <span class="text-blue-600 text-xl font-bold">${{ property.price }}</span></div>
+        <div>Bedrooms: <span class="text-blue-600">{{ property.bedrooms }}</span></div>
+        <div>Bathrooms: <span class="text-blue-600">{{ property.bathrooms }}</span></div>
+        <div>Area: <span class="text-blue-600">{{ property.area }} sq ft</span></div>
+    </div>
+
+    <h2 class="text-2xl font-bold text-gray-900 mt-8 mb-4">Property Location</h2>
+    {% if property.latitude and property.longitude %}
+    <a href="https://www.google.com/maps/search/?api=1&query={{ property.latitude }},{{ property.longitude }}" target="_blank" class="text-blue-600 underline hover:text-blue-800">
+        View on Google Maps
+    </a>
+    {% else %}
+    <p class="text-gray-600">Location coordinates not available.</p>
+    {% endif %}
+
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">Contact about this property</h2>
+    <form method="post" class="max-w-md space-y-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">Send Inquiry</button>
+    </form>
+
+    <a href="{% url 'listings:home' %}" class="inline-block mt-6 text-blue-600 hover:underline">&larr; Back to Listings</a>
+</div>
+{% endblock %}
